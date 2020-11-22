@@ -274,8 +274,8 @@ void get_screen_resolution(LONG* out_width, LONG* out_height) {
 
 } // namespace
 
-int WINAPI WinMain(const HINSTANCE hInstance, const HINSTANCE hPrev, const LPSTR args,
-                   const int nShowCmd) {
+int WINAPI WinMain(const HINSTANCE hInstance, const HINSTANCE prev, const LPSTR args,
+                   const int) {
   WNDCLASS wc = {0};
   // The classname MUST be the same as the filename since VirtuaWin uses this for locating
   // the window.
@@ -287,10 +287,10 @@ int WINAPI WinMain(const HINSTANCE hInstance, const HINSTANCE hPrev, const LPSTR
 
   LONG screen_height;
   get_screen_resolution(nullptr, &screen_height);
-  const auto hwnd = CreateWindowEx(
-    WS_EX_TOOLWINDOW, wc.lpszClassName, module_name, WS_POPUP | WS_VISIBLE, config.pad,
-    screen_height - config.height - config.pad, popcount(desktops) * config.label_width,
-    config.height, nullptr, nullptr, hInstance, nullptr);
+  const auto hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, wc.lpszClassName,
+                                   module_name, WS_POPUP | WS_VISIBLE, config.pad,
+                                   screen_height - config.height - config.pad, 0, 0,
+                                   nullptr, nullptr, hInstance, nullptr);
   SetWindowLong(hwnd, GWL_STYLE, 0); // Remove title bar and border.
   resize_client(hwnd);
   SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
