@@ -1,9 +1,9 @@
 <h1 align="center">virtuawin-bar</h1>
 
-`virtuawin-bar` is a [VirtuaWin](https://virtuawin.sourceforge.io/) module which
-lists all of the non-empty virtual desktops, and highlights the currently active
-one.  It is similar to status bars designed to work with tiling window managers,
-like `i3bar` and `polybar`, but for Windows.
+**`virtuawin-bar`** is a [VirtuaWin](https://virtuawin.sourceforge.io/) module
+which lists all of the non-empty virtual desktops, and highlights the currently
+active one.  It is similar to status bars designed to work with tiling window
+managers, like i3bar and Polybar, but for Windows.
 
 This project is unaffiliated with the official VirtuaWin project.
 
