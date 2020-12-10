@@ -21,20 +21,28 @@ constexpr auto module_name_exe = _T("virtuawin-bar.exe");
 // Globals //
 /////////////
 
-Config config;
-// Flags.
-uint8_t initialized = 0;
-// Handle to VirtuaWin.
-HWND vwHandle = nullptr;
-// User's config path.
-TCHAR user_app_path[MAX_PATH];
+struct State {
+  Config config;
+  // Flags.
+  uint8_t initialized = 0;
+  // Handle to VirtuaWin.
+  HWND vw_handle = nullptr;
+  // User's config path.
+  TCHAR user_app_path[MAX_PATH];
 
-// Desktop i has at least one window if and only if desktops & (1 << i) != 0.
-uint32_t desktops = 0;
-static_assert(vwDESKTOP_MAX < 32,
-              "cannot store desktop set in an int32, use int64 or bigger instead");
-// Index of currently active desktop.
-uint8_t active_desktop = 0;
+  // Desktop i has at least one window if and only if desktops & (1 << i) != 0.
+  uint32_t desktops = 0;
+  static_assert(vwDESKTOP_MAX < 32,
+                "cannot store desktop set in an int32, use int64 or bigger instead");
+  // Index of currently active desktop.
+  uint8_t active_desktop = 0;
+};
+
+struct Module {
+  State state;
+};
+
+Module mod;
 
 ///////////////
 // Functions //
@@ -51,14 +59,15 @@ int popcount(uint32_t v) {
 
 /// Change the dimensions of the bar.
 void resize_client(const HWND hwnd) {
+  const auto& state = mod.state;
   static int old_width = -1;
   if (IsWindow(hwnd)) {
     const auto style = DWORD(GetWindowLongPtr(hwnd, GWL_STYLE));
     const auto ex_style = DWORD(GetWindowLongPtr(hwnd, GWL_EXSTYLE));
     const HMENU menu = GetMenu(hwnd);
-    const auto width = popcount(desktops) * (LONG)config.label_width;
+    const auto width = popcount(state.desktops) * (LONG)state.config.label_width;
     if (width != old_width) {
-      RECT rc = {0, 0, width, config.height};
+      RECT rc = {0, 0, width, state.config.height};
       AdjustWindowRectEx(&rc, style, menu ? TRUE : FALSE, ex_style);
       SetWindowPos(hwnd, nullptr, 0, 0, rc.right - rc.left, rc.bottom - rc.top,
                    SWP_NOZORDER | SWP_NOMOVE);
@@ -67,16 +76,17 @@ void resize_client(const HWND hwnd) {
 }
 
 __inline BOOL CALLBACK enum_windows_proc(const HWND hwnd, const LPARAM desk_count) {
-  if (vwHandle) {
+  auto& state = mod.state;
+  if (state.vw_handle) {
     const auto style = GetWindowLong(hwnd, GWL_STYLE);
     if (!(style & WS_CHILD)) {
-      const auto flag = SendMessage(vwHandle, VW_WINGETINFO, (WPARAM)hwnd, 0);
+      const auto flag = SendMessage(state.vw_handle, VW_WINGETINFO, (WPARAM)hwnd, 0);
       if (flag && (flag & vwWINFLAGS_MANAGED)) {
         const auto desk = vwWindowGetInfoDesk(flag);
-        if (desk != active_desktop && desk > desk_count) {
+        if (desk != state.active_desktop && desk > desk_count) {
           return TRUE; // On a hidden desktop, so skip.
         }
-        desktops |= 1 << desk;
+        state.desktops |= 1 << desk;
       }
     }
   }
@@ -84,22 +94,24 @@ __inline BOOL CALLBACK enum_windows_proc(const HWND hwnd, const LPARAM desk_coun
 }
 
 void update_desktop_set() {
-  desktops = 0; // Clear.
-  const auto desk_count =
-    SendMessage(vwHandle, VW_DESKX, 0, 0) * SendMessage(vwHandle, VW_DESKY, 0, 0);
+  mod.state.desktops = 0; // Clear.
+  const auto desk_count = SendMessage(mod.state.vw_handle, VW_DESKX, 0, 0) *
+                          SendMessage(mod.state.vw_handle, VW_DESKY, 0, 0);
   EnumWindows(enum_windows_proc, desk_count);
 }
 
-void draw_rounded_background(cairo_t* const cr, const int active) {
+void draw_rounded_background(cairo_t* const cr) {
+  auto& state = mod.state;
+  const auto& config = state.config;
   constexpr auto pi = 3.14159265359;
   constexpr auto degrees = pi / 180.0;
-  const auto radius = config.corner_radius;
-  const auto n_desktops = popcount(desktops);
+  const auto radius = state.config.corner_radius;
+  const auto n_desktops = popcount(state.desktops);
   const auto width = n_desktops * config.height;
 
   cairo_new_sub_path(cr);
   cairo_arc(cr, width - radius, radius, radius, -90 * degrees, 0 * degrees);
-  cairo_arc(cr, width - radius, config.height - radius, radius, 0 * degrees,
+  cairo_arc(cr, width - radius, state.config.height - radius, radius, 0 * degrees,
             90 * degrees);
   cairo_arc(cr, radius, config.height - radius, radius, 90 * degrees, 180 * degrees);
   cairo_arc(cr, radius, radius, radius, 180 * degrees, 270 * degrees);
@@ -113,7 +125,7 @@ void draw_rounded_background(cairo_t* const cr, const int active) {
   uint8_t desk_ids[vwDESKTOP_MAX];
   uint8_t desk_ids_size = 0;
   for (auto i = uint8_t(1); i < vwDESKTOP_MAX + 1; ++i) {
-    if (desktops & (1 << i)) {
+    if (state.desktops & (1 << i)) {
       desk_ids[desk_ids_size] = i;
       desk_ids_size++;
     }
@@ -122,8 +134,9 @@ void draw_rounded_background(cairo_t* const cr, const int active) {
   for (auto i = uint8_t(0); i < desk_ids_size; ++i) {
     const auto desktop = desk_ids[i];
     const auto& text_color =
-      (desktop == active ? config.active_text_color : config.inactive_text_color);
-    if (desktop == active) {
+      (desktop == state.active_desktop ? config.active_text_color
+                                       : config.inactive_text_color);
+    if (desktop == state.active_desktop) {
       // Draw active.
       cairo_set_source_rgb(cr, config.highlight_color.r, config.highlight_color.g,
                            config.highlight_color.b);
@@ -155,7 +168,7 @@ void paint(const HWND hwnd, WPARAM wParam, LPARAM lParam) {
   auto* const cr = cairo_create(surface);
 
   // Draw on the cairo context.
-  draw_rounded_background(cr, active_desktop);
+  draw_rounded_background(cr);
 
   // Cleanup.
   cairo_destroy(cr);
@@ -171,20 +184,20 @@ LRESULT CALLBACK wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
     case MOD_INIT: {
       // This must be taken care of in order to get the handle to VirtuaWin.
       // The handle to VirtuaWin comes in the wParam.
-      vwHandle = (HWND)wParam;
-      if (!vwHandle) {
+      mod.state.vw_handle = (HWND)wParam;
+      if (!mod.state.vw_handle) {
         MessageBox(hwnd, _T("Failed to get handle to VirtuaWin."), _T("Module Error"),
                    MB_ICONWARNING);
         exit(1);
       }
       // wParam == 1: Set self as desktop change handler.
-      SendMessage(vwHandle, VW_ICHANGEDESK, 1, 0);
+      SendMessage(mod.state.vw_handle, VW_ICHANGEDESK, 1, 0);
       // Unmanage self.
-      SendMessage(vwHandle, VW_WINMANAGE, (WPARAM)hwnd, 0);
-      if (!initialized) {
-        SendMessage(vwHandle, VW_USERAPPPATH, (WPARAM)hwnd, 0);
+      SendMessage(mod.state.vw_handle, VW_WINMANAGE, (WPARAM)hwnd, 0);
+      if (!mod.state.initialized) {
+        SendMessage(mod.state.vw_handle, VW_USERAPPPATH, (WPARAM)hwnd, 0);
         // TODO: Is a delay necessary here?
-        if ((initialized & 2) == 0) {
+        if ((mod.state.initialized & 2) == 0) {
           MessageBox(hwnd,
                      _T("VirtuaWin failed to send the UserApp path to VirtaWin Bar."),
                      _T("Module Error"), MB_ICONWARNING);
@@ -193,25 +206,26 @@ LRESULT CALLBACK wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
       }
       // Initialize desktop set.
       update_desktop_set();
-      active_desktop = (uint8_t)SendMessage(vwHandle, VW_CURDESK, 0, 0);
-      desktops |= 1 << active_desktop;
+      mod.state.active_desktop =
+        (uint8_t)SendMessage(mod.state.vw_handle, VW_CURDESK, 0, 0);
+      mod.state.desktops |= 1 << mod.state.active_desktop;
       resize_client(hwnd);
       InvalidateRect(hwnd, nullptr, true);
     } break;
 
     case WM_COPYDATA: {
       auto* const cds = (COPYDATASTRUCT*)lParam;
-      if ((int)cds->dwData == (0 - VW_USERAPPPATH) && (initialized & 2) == 0) {
+      if ((int)cds->dwData == (0 - VW_USERAPPPATH) && (mod.state.initialized & 2) == 0) {
         if (cds->cbData < 2 || !cds->lpData) {
           return FALSE;
         }
-        initialized |= 2;
+        mod.state.initialized |= 2;
 #ifdef _UNICODE
         MultiByteToWideChar(CP_ACP, 0, (char*)cds->lpData, -1, user_app_path, MAX_PATH);
 #else
-        strncpy(user_app_path, (char*)cds->lpData, MAX_PATH);
+        strncpy(mod.state.user_app_path, (char*)cds->lpData, MAX_PATH);
 #endif
-        user_app_path[MAX_PATH - 1] = '\0';
+        mod.state.user_app_path[MAX_PATH - 1] = '\0';
       }
       return TRUE;
     } break;
@@ -226,12 +240,12 @@ LRESULT CALLBACK wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
     case MOD_CHANGEDESK: {
       // VirtuaWin might sent two MOD_CHANGEDESK messages in the case of a wrap-around,
       // but we don't care about that.  So we only handle the first one.
-      if (active_desktop != lParam) {
-        active_desktop = decltype(active_desktop)(lParam);
+      if (mod.state.active_desktop != lParam) {
+        mod.state.active_desktop = decltype(mod.state.active_desktop)(lParam);
         // wParam == 3: Execute the desktop change.
-        SendMessage(vwHandle, VW_ICHANGEDESK, 3, 0);
+        SendMessage(mod.state.vw_handle, VW_ICHANGEDESK, 3, 0);
         update_desktop_set();
-        desktops |= 1 << active_desktop;
+        mod.state.desktops |= 1 << mod.state.active_desktop;
         resize_client(hwnd);
         InvalidateRect(hwnd, nullptr, true);
         // UpdateWindow doesn't seem to be necessary here.
@@ -243,7 +257,7 @@ LRESULT CALLBACK wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
       TCHAR message[64 + MAX_PATH];
       snprintf(message, 64 + MAX_PATH,
                "The configuration file for virtuawin-bar is located at %sbar.json",
-               user_app_path);
+               mod.state.user_app_path);
       MessageBox(hwnd, message, module_name, MB_ICONINFORMATION);
     } break;
 
@@ -252,7 +266,7 @@ LRESULT CALLBACK wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
     case WM_CLOSE:
     case WM_DESTROY:
       // wParam == 2: Remove self as desktop change handler.
-      SendMessage(vwHandle, VW_ICHANGEDESK, 2, 0);
+      SendMessage(mod.state.vw_handle, VW_ICHANGEDESK, 2, 0);
       PostQuitMessage(0);
       break;
 
@@ -287,6 +301,7 @@ int WINAPI WinMain(const HINSTANCE hInstance, const HINSTANCE prev, const LPSTR 
 
   LONG screen_height;
   get_screen_resolution(nullptr, &screen_height);
+  const auto& config = mod.state.config;
   const auto hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, wc.lpszClassName,
                                    module_name, WS_POPUP | WS_VISIBLE, config.pad,
                                    screen_height - config.height - config.pad, 0, 0,
