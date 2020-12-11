@@ -11,7 +11,4 @@ void init_bar(State& state, HINSTANCE instance, HWND parent);
 /// Change the dimensions of the bar.
 void resize_client(const State&);
 
-/// Handle WM_PAINT.
-void paint(HWND);
-
 } // namespace vwbar
