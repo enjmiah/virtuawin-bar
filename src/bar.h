@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-namespace vwbar {
+namespace vwtiling {
 
 struct State;
 
@@ -13,4 +13,4 @@ void destroy_bar(State& state);
 /// Change the dimensions of the bar.
 void resize_client(const State&);
 
-} // namespace vwbar
+} // namespace vwtiling

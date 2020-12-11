@@ -8,13 +8,13 @@
 
 #include <cstdint>
 
-#ifdef VWBAR_EXPORTS
-  #define VWBAR_API extern "C" __declspec(dllexport)
+#ifdef VWTILING_EXPORTS
+  #define VWTILING_API extern "C" __declspec(dllexport)
 #else
-  #define VWBAR_API extern "C" __declspec(dllimport)
+  #define VWTILING_API extern "C" __declspec(dllimport)
 #endif
 
-namespace vwbar {
+namespace vwtiling {
 
 struct State {
   Config config;
@@ -37,12 +37,12 @@ struct State {
   std::uint8_t active_desktop = 0;
 };
 
-VWBAR_API void init(HINSTANCE instance, State& init_state);
+VWTILING_API void init(HINSTANCE instance, State& init_state);
 
-VWBAR_API LRESULT handle_message(HWND, UINT msg, WPARAM, LPARAM);
+VWTILING_API LRESULT handle_message(HWND, UINT msg, WPARAM, LPARAM);
 
-VWBAR_API void destroy();
+VWTILING_API void destroy();
 
 State& get_state();
 
-} // namespace vwbar
+} // namespace vwtiling

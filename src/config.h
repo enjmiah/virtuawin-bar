@@ -1,6 +1,6 @@
 #pragma once
 
-namespace vwbar {
+namespace vwtiling {
 
 struct RGBColor {
   double r;
@@ -31,4 +31,4 @@ struct Config {
   RGBColor active_text_color = background_color;
 };
 
-} // namespace vwbar
+} // namespace vwtiling

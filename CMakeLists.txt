@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(virtuawin-bar)
+project(virtuawin-tiling)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -21,9 +21,9 @@ set(EXE_SOURCE_FILES
 )
 
 add_library(${PROJECT_NAME}-dll SHARED ${DLL_HEADER_FILES} ${DLL_SOURCE_FILES})
-target_compile_definitions(${PROJECT_NAME}-dll PRIVATE VWBAR_EXPORTS)
+target_compile_definitions(${PROJECT_NAME}-dll PRIVATE VWTILING_EXPORTS)
 target_compile_definitions(${PROJECT_NAME}-dll PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS)
-set_target_properties(${PROJECT_NAME}-dll PROPERTIES OUTPUT_NAME vwbar)
+set_target_properties(${PROJECT_NAME}-dll PROPERTIES OUTPUT_NAME vwtiling)
 
 add_executable(${PROJECT_NAME} WIN32 ${EXE_SOURCE_FILES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS)

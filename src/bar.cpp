@@ -26,7 +26,7 @@ int popcount(std::uint32_t v) {
 void draw_bar(cairo_t* const cr) {
   constexpr auto pi = 3.14159265359;
   constexpr auto degrees = pi / 180.0;
-  const auto& state = ::vwbar::get_state();
+  const auto& state = ::vwtiling::get_state();
   const auto& config = state.config;
   const auto radius = config.corner_radius;
   const auto n_desktops = popcount(state.desktops);
@@ -129,10 +129,10 @@ void get_screen_resolution(LONG* out_width, LONG* out_height) {
 
 } // namespace
 
-namespace vwbar {
+namespace vwtiling {
 
 void init_bar(State& state, const HINSTANCE instance, const HWND parent) {
-  constexpr auto module_name = _T("vwbar");
+  constexpr auto module_name = _T("vwtiling");
   WNDCLASS wc = {0};
   wc.lpszClassName = module_name;
   wc.hInstance = instance;
@@ -178,4 +178,4 @@ void resize_client(const State& state) {
   }
 }
 
-} // namespace vwbar
+} // namespace vwtiling

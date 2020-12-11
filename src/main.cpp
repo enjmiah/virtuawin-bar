@@ -2,17 +2,17 @@
 
 #include <string>
 
-namespace vb = ::vwbar;
+namespace vt = ::vwtiling;
 
-constexpr auto module_name = "virtuawin-bar";
-constexpr auto module_name_exe = "virtuawin-bar.exe";
+constexpr auto module_name = "virtuawin-tiling";
+constexpr auto module_name_exe = "virtuawin-tiling.exe";
 
 struct Module {
-  vb::State state;
+  vt::State state;
   HMODULE dll = nullptr;
-  decltype(&vb::init) init;
-  decltype(&vb::destroy) destroy;
-  decltype(&vb::handle_message) handle_message;
+  decltype(&vt::init) init;
+  decltype(&vt::destroy) destroy;
+  decltype(&vt::handle_message) handle_message;
   FILETIME load_time;
 } mod;
 
@@ -22,23 +22,23 @@ bool dynamic_load_module(Module& mod, const HINSTANCE instance,
   CopyFileW(dll_path.c_str(), new_path.c_str(), FALSE);
   mod.dll = LoadLibraryW(new_path.c_str());
   if (!mod.dll) {
-    MessageBoxA(nullptr, "Could not load vwbar.dll", nullptr, MB_OK);
+    MessageBoxA(nullptr, "Could not load vwtiling.dll", nullptr, MB_OK);
     return false;
   }
-  mod.init = (decltype(&vb::init))GetProcAddress(mod.dll, "init");
+  mod.init = (decltype(&vt::init))GetProcAddress(mod.dll, "init");
   if (!mod.init) {
-    MessageBoxA(nullptr, "Could not load vwbar.dll:init", nullptr, MB_OK);
+    MessageBoxA(nullptr, "Could not load vwtiling.dll:init", nullptr, MB_OK);
     return false;
   }
-  mod.destroy = (decltype(&vb::destroy))GetProcAddress(mod.dll, "destroy");
+  mod.destroy = (decltype(&vt::destroy))GetProcAddress(mod.dll, "destroy");
   if (!mod.destroy) {
-    MessageBoxA(nullptr, "Could not load vwbar.dll:destroy", nullptr, MB_OK);
+    MessageBoxA(nullptr, "Could not load vwtiling.dll:destroy", nullptr, MB_OK);
     return false;
   }
   mod.handle_message =
-    (decltype(&vb::handle_message))GetProcAddress(mod.dll, "handle_message");
+    (decltype(&vt::handle_message))GetProcAddress(mod.dll, "handle_message");
   if (!mod.handle_message) {
-    MessageBoxA(nullptr, "Could not load vwbar.dll:handle_message", nullptr, MB_OK);
+    MessageBoxA(nullptr, "Could not load vwtiling.dll:handle_message", nullptr, MB_OK);
     return false;
   }
 
@@ -58,12 +58,12 @@ FILETIME get_last_modified(const std::wstring& path) {
   const auto f = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
                              OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (f == INVALID_HANDLE_VALUE || GetLastError() == ERROR_FILE_NOT_FOUND) {
-    MessageBoxA(nullptr, "Could not find vwbar.dll", nullptr, MB_OK);
+    MessageBoxA(nullptr, "Could not find vwtiling.dll", nullptr, MB_OK);
   }
   FILETIME result;
   if (!GetFileTime(f, NULL, NULL, &result)) {
     MessageBoxA(nullptr,
-                "Could not access vwbar.dll's last write time for live reloading",
+                "Could not access vwtiling.dll's last write time for live reloading",
                 nullptr, MB_OK);
   }
   CloseHandle(f);
@@ -102,7 +102,7 @@ int WINAPI WinMain(const HINSTANCE instance, HINSTANCE /*prev*/, LPSTR /*args*/,
         basename_start = scan + 1;
       }
     }
-    wchar_t dll_basename[] = L"vwbar.dll";
+    wchar_t dll_basename[] = L"vwtiling.dll";
     for (int i = 0; i < sizeof(dll_basename) / sizeof(dll_basename[0]); ++i) {
       basename_start[i] = dll_basename[i];
     }
@@ -123,7 +123,7 @@ int WINAPI WinMain(const HINSTANCE instance, HINSTANCE /*prev*/, LPSTR /*args*/,
     if (CompareFileTime(&last_write_time, &mod.load_time) == 1) {
       mod.load_time = last_write_time;
       if (!dynamic_unload_module(mod)) {
-        MessageBoxA(nullptr, "Could not unload vwbar.dll", nullptr, MB_OK);
+        MessageBoxA(nullptr, "Could not unload vwtiling.dll", nullptr, MB_OK);
         return 2;
       }
       if (!dynamic_load_module(mod, instance, dll_path)) {
