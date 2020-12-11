@@ -2,7 +2,7 @@
 
 int WINAPI WinMain(const HINSTANCE instance, HINSTANCE /*prev*/, LPSTR /*args*/,
                    const int) {
-  vwbar::init(instance);
+  ::vwbar::init(instance);
 
   MSG msg;
   while (GetMessage(&msg, nullptr, 0, 0) > 0) {

@@ -1,13 +1,18 @@
 #pragma once
 
 #include "config.h"
-#include "macros.h"
 
 #include "VirtuaWin/defines.h"
 
 #include <Windows.h>
 
 #include <cstdint>
+
+#ifdef VWBAR_EXPORTS
+  #define VWBAR_API __declspec(dllexport)
+#else
+  #define VWBAR_API __declspec(dllimport)
+#endif
 
 namespace vwbar {
 
@@ -35,5 +40,7 @@ struct Module {
 };
 
 VWBAR_API void init(HINSTANCE instance);
+
+State& get_state();
 
 } // namespace vwbar

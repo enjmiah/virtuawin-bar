@@ -10,7 +10,6 @@ set(DLL_HEADER_FILES
     src/bar.h
     src/config.h
     src/handler.h
-    src/macros.h
 )
 set(DLL_SOURCE_FILES
     src/bar.cpp

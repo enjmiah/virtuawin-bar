@@ -4,6 +4,7 @@
 
 #include "VirtuaWin/messages.h"
 
+#include <cassert>
 #include <cstdio>
 #include <tchar.h>
 
@@ -76,7 +77,7 @@ LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
         (uint8_t)SendMessage(mod.state.vw_handle, VW_CURDESK, 0, 0);
       mod.state.desktops |= 1 << mod.state.active_desktop;
       resize_client(mod.state);
-      InvalidateRect(hwnd, nullptr, true);
+      InvalidateRect(mod.state.bar_hwnd, nullptr, true);
     } break;
 
     case WM_COPYDATA: {
@@ -96,10 +97,6 @@ LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
       return TRUE;
     } break;
 
-    case WM_PAINT:
-      paint(hwnd, mod.state);
-      break;
-
     case MOD_CFGCHANGE:
       break;
 
@@ -113,7 +110,7 @@ LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
         update_desktop_set();
         mod.state.desktops |= 1 << mod.state.active_desktop;
         resize_client(mod.state);
-        InvalidateRect(hwnd, nullptr, true);
+        InvalidateRect(mod.state.bar_hwnd, nullptr, true);
         // UpdateWindow doesn't seem to be necessary here.
       }
     } break;
@@ -142,17 +139,8 @@ LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
   return 0;
 }
 
-void get_screen_resolution(LONG* out_width, LONG* out_height) {
-  auto* const desktop = GetDesktopWindow();
-  RECT rect;
-  GetWindowRect(desktop, &rect);
-  if (out_width)
-    *out_width = rect.right;
-  if (out_height)
-    *out_height = rect.bottom;
-}
-
 void init(const HINSTANCE instance) {
+  // Create invisible parent window for receiving messages.
   WNDCLASS wc = {0};
   // The classname MUST be the same as the filename since VirtuaWin uses this for locating
   // the window.
@@ -161,21 +149,12 @@ void init(const HINSTANCE instance) {
   wc.lpfnWndProc = wnd_proc;
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   RegisterClass(&wc);
+  auto* const hwnd = CreateWindowA(wc.lpszClassName, module_name, NULL, 0, 0, 0, 0,
+                                   nullptr, nullptr, instance, nullptr);
 
-  LONG screen_height;
-  get_screen_resolution(nullptr, &screen_height);
-  const auto& config = mod.state.config;
-  auto* const hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, wc.lpszClassName,
-                                    module_name, WS_POPUP | WS_VISIBLE, config.pad,
-                                    screen_height - config.height - config.pad, 0, 0,
-                                    nullptr, nullptr, instance, nullptr);
-  mod.state.bar_hwnd = hwnd;
-  SetWindowLong(hwnd, GWL_STYLE, 0); // Remove title bar and border.
-  resize_client(mod.state);
-  SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-               SWP_NOMOVE | SWP_NOSIZE); // Always on top.
-
-  ShowWindow(hwnd, SW_SHOWNA);
+  init_bar(mod.state, instance, hwnd);
 }
+
+State& get_state() { return mod.state; }
 
 } // namespace vwbar

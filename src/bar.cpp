@@ -5,6 +5,7 @@
 #include "VirtuaWin/defines.h"
 
 #include <cairo-win32.h>
+#include <tchar.h>
 
 #include <cstdint>
 #include <cstdio>
@@ -22,9 +23,63 @@ int popcount(std::uint32_t v) {
   return c;
 }
 
+/// Handle window messages to the bar.
+LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
+                 const LPARAM lParam) {
+  switch (msg) {
+    case WM_PAINT:
+      ::vwbar::paint(hwnd);
+      break;
+
+    case WM_CLOSE:
+    case WM_DESTROY:
+      PostQuitMessage(0);
+      break;
+
+    default:
+      return DefWindowProc(hwnd, msg, wParam, lParam);
+  }
+  return 0;
+}
+
+void get_screen_resolution(LONG* out_width, LONG* out_height) {
+  auto* const desktop = GetDesktopWindow();
+  RECT rect;
+  GetWindowRect(desktop, &rect);
+  if (out_width)
+    *out_width = rect.right;
+  if (out_height)
+    *out_height = rect.bottom;
+}
+
 } // namespace
 
 namespace vwbar {
+
+void init_bar(State& state, const HINSTANCE instance, const HWND parent) {
+  constexpr auto module_name = _T("vwbar");
+  WNDCLASS wc = {0};
+  wc.lpszClassName = module_name;
+  wc.hInstance = instance;
+  wc.lpfnWndProc = wnd_proc;
+  wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+  RegisterClass(&wc);
+
+  LONG screen_height;
+  get_screen_resolution(nullptr, &screen_height);
+  const auto& config = state.config;
+  auto* const hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, wc.lpszClassName,
+                                    module_name, WS_POPUP | WS_VISIBLE, config.pad,
+                                    screen_height - config.height - config.pad, 0, 0,
+                                    parent, nullptr, instance, nullptr);
+  state.bar_hwnd = hwnd;
+  SetWindowLong(hwnd, GWL_STYLE, 0); // Remove title bar and border.
+  resize_client(state);
+  SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+               SWP_NOMOVE | SWP_NOSIZE); // Always on top.
+
+  ShowWindow(hwnd, SW_SHOWNA);
+}
 
 void resize_client(const State& state) {
   static int old_width = -1;
@@ -32,20 +87,20 @@ void resize_client(const State& state) {
   if (hwnd && IsWindow(hwnd)) {
     const auto style = DWORD(GetWindowLongPtr(hwnd, GWL_STYLE));
     const auto ex_style = DWORD(GetWindowLongPtr(hwnd, GWL_EXSTYLE));
-    const HMENU menu = GetMenu(hwnd);
     const auto width = popcount(state.desktops) * (LONG)state.config.label_width;
     if (width != old_width) {
       RECT rc = {0, 0, width, state.config.height};
-      AdjustWindowRectEx(&rc, style, menu ? TRUE : FALSE, ex_style);
+      AdjustWindowRectEx(&rc, style, GetMenu(hwnd) ? TRUE : FALSE, ex_style);
       SetWindowPos(hwnd, nullptr, 0, 0, rc.right - rc.left, rc.bottom - rc.top,
                    SWP_NOZORDER | SWP_NOMOVE);
     }
   }
 }
 
-void draw_bar(cairo_t* const cr, const State& state) {
+void draw_bar(cairo_t* const cr) {
   constexpr auto pi = 3.14159265359;
   constexpr auto degrees = pi / 180.0;
+  const auto& state = get_state();
   const auto& config = state.config;
   const auto radius = config.corner_radius;
   const auto n_desktops = popcount(state.desktops);
@@ -100,7 +155,7 @@ void draw_bar(cairo_t* const cr, const State& state) {
   }
 }
 
-void paint(const HWND hwnd, const State& state) {
+void paint(const HWND hwnd) {
   PAINTSTRUCT ps;
   auto* const hdc = BeginPaint(hwnd, &ps);
 
@@ -109,7 +164,7 @@ void paint(const HWND hwnd, const State& state) {
   auto* const cr = cairo_create(surface);
 
   // Draw on the cairo context.
-  draw_bar(cr, state);
+  draw_bar(cr);
 
   // Cleanup.
   cairo_destroy(cr);
