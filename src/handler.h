@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace virtuawinbar {
+namespace vwbar {
 
 struct State {
   Config config;
@@ -36,4 +36,4 @@ struct Module {
 
 VWBAR_API void init(HINSTANCE instance);
 
-} // namespace virtuawinbar
+} // namespace vwbar

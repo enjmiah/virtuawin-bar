@@ -24,7 +24,7 @@ int popcount(std::uint32_t v) {
 
 } // namespace
 
-namespace virtuawinbar {
+namespace vwbar {
 
 void resize_client(const State& state) {
   static int old_width = -1;
@@ -43,7 +43,7 @@ void resize_client(const State& state) {
   }
 }
 
-void draw_rounded_background(cairo_t* const cr, const State& state) {
+void draw_bar(cairo_t* const cr, const State& state) {
   const auto& config = state.config;
   constexpr auto pi = 3.14159265359;
   constexpr auto degrees = pi / 180.0;
@@ -109,7 +109,7 @@ void paint(const HWND hwnd, const State& state) {
   auto* const cr = cairo_create(surface);
 
   // Draw on the cairo context.
-  draw_rounded_background(cr, state);
+  draw_bar(cr, state);
 
   // Cleanup.
   cairo_destroy(cr);
@@ -118,4 +118,4 @@ void paint(const HWND hwnd, const State& state) {
   EndPaint(hwnd, &ps);
 }
 
-} // namespace virtuawinbar
+} // namespace vwbar

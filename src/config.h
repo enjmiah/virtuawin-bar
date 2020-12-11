@@ -1,6 +1,6 @@
 #pragma once
 
-namespace virtuawinbar {
+namespace vwbar {
 
 struct RGBColor {
   double r;
@@ -31,4 +31,4 @@ struct Config {
   RGBColor active_text_color = background_color;
 };
 
-} // namespace virtuawinbar
+} // namespace vwbar

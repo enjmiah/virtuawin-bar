@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <tchar.h>
 
-namespace vb = ::virtuawinbar;
+namespace vb = ::vwbar;
 
 namespace {
 
@@ -18,7 +18,7 @@ vb::Module mod;
 
 } // namespace
 
-namespace virtuawinbar {
+namespace vwbar {
 
 __inline BOOL CALLBACK enum_windows_proc(const HWND hwnd, const LPARAM desk_count) {
   auto& state = mod.state;
@@ -180,4 +180,4 @@ void init(const HINSTANCE instance) {
   ShowWindow(hwnd, SW_SHOWNA);
 }
 
-} // namespace virtuawinbar
+} // namespace vwbar

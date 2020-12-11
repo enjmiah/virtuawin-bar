@@ -8,7 +8,7 @@
 struct _cairo;
 typedef struct _cairo cairo_t;
 
-namespace virtuawinbar {
+namespace vwbar {
 
 struct State;
 
@@ -18,4 +18,4 @@ VWBAR_API void resize_client(const State&);
 /// Handle WM_PAINT.
 VWBAR_API void paint(HWND, const State&);
 
-} // namespace virtuawinbar
+} // namespace vwbar
