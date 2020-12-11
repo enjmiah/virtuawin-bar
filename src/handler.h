@@ -9,9 +9,9 @@
 #include <cstdint>
 
 #ifdef VWBAR_EXPORTS
-  #define VWBAR_API __declspec(dllexport)
+  #define VWBAR_API extern "C" __declspec(dllexport)
 #else
-  #define VWBAR_API __declspec(dllimport)
+  #define VWBAR_API extern "C" __declspec(dllimport)
 #endif
 
 namespace vwbar {
@@ -35,12 +35,8 @@ struct State {
   std::uint8_t active_desktop = 0;
 };
 
-struct Module {
-  State state;
-};
-
 VWBAR_API void init(HINSTANCE instance);
 
-State& get_state();
+VWBAR_API State& get_state();
 
 } // namespace vwbar

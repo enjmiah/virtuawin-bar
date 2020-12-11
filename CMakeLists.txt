@@ -27,7 +27,6 @@ set_target_properties(${PROJECT_NAME}-dll PROPERTIES OUTPUT_NAME vwbar)
 
 add_executable(${PROJECT_NAME} WIN32 ${EXE_SOURCE_FILES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS)
-target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}-dll)
 
 source_group(TREE ${PROJECT_SOURCE_DIR}
              FILES ${DLL_HEADER_FILES} ${DLL_SOURCE_FILES} ${EXE_SOURCE_FILES})
