@@ -44,10 +44,10 @@ void resize_client(const State& state) {
 }
 
 void draw_bar(cairo_t* const cr, const State& state) {
-  const auto& config = state.config;
   constexpr auto pi = 3.14159265359;
   constexpr auto degrees = pi / 180.0;
-  const auto radius = state.config.corner_radius;
+  const auto& config = state.config;
+  const auto radius = config.corner_radius;
   const auto n_desktops = popcount(state.desktops);
   const auto width = n_desktops * config.height;
 

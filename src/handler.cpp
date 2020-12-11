@@ -7,14 +7,12 @@
 #include <cstdio>
 #include <tchar.h>
 
-namespace vb = ::vwbar;
-
 namespace {
 
 constexpr auto module_name = _T("virtuawin-bar");
 constexpr auto module_name_exe = _T("virtuawin-bar.exe");
 
-vb::Module mod;
+::vwbar::Module mod;
 
 } // namespace
 
