@@ -25,7 +25,7 @@ struct State {
   // Desktop i has at least one window if and only if desktops & (1 << i) != 0.
   std::uint32_t desktops = 0;
   static_assert(vwDESKTOP_MAX < 32,
-                "cannot store desktop set in an int32, use int64 or bigger instead");
+                "cannot store desktop set in an uint32, use uint64 or bigger instead");
   // Index of currently active desktop.
   std::uint8_t active_desktop = 0;
 };

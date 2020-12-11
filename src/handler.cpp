@@ -105,7 +105,7 @@ LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
 
     case MOD_CHANGEDESK: {
       // VirtuaWin might sent two MOD_CHANGEDESK messages in the case of a wrap-around,
-      // but we don't care about that.  So we only handle the first one.
+      // but we don't care about that.  So we only do something for the first one.
       if (mod.state.active_desktop != lParam) {
         mod.state.active_desktop = decltype(mod.state.active_desktop)(lParam);
         // wParam == 3: Execute the desktop change.
