@@ -109,8 +109,6 @@ LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
       break;
 
     case WM_CLOSE:
-    case WM_DESTROY:
-      PostQuitMessage(0);
       break;
 
     default:
@@ -158,6 +156,11 @@ void init_bar(State& state, const HINSTANCE instance, const HWND parent) {
   ShowWindow(hwnd, SW_SHOWNA);
 }
 
+void destroy_bar(State& state) {
+  DestroyWindow(state.bar_hwnd);
+  state.bar_hwnd = nullptr;
+}
+
 void resize_client(const State& state) {
   static int old_width = -1;
   auto* const hwnd = state.bar_hwnd;
@@ -170,6 +173,7 @@ void resize_client(const State& state) {
       AdjustWindowRectEx(&rc, style, GetMenu(hwnd) ? TRUE : FALSE, ex_style);
       SetWindowPos(hwnd, nullptr, 0, 0, rc.right - rc.left, rc.bottom - rc.top,
                    SWP_NOZORDER | SWP_NOMOVE);
+      old_width = width;
     }
   }
 }

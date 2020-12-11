@@ -22,10 +22,12 @@ struct State {
   uint8_t initialized = 0;
   // Handle to VirtuaWin.
   HWND vw_handle = nullptr;
-  // Handle to the bar window (null if non-existent).
-  HWND bar_hwnd = nullptr;
   // User's config path.
   TCHAR user_app_path[MAX_PATH];
+  // Handle to messaging window.
+  HWND messaging_hwnd = nullptr;
+  // Handle to the bar window (null if non-existent).
+  HWND bar_hwnd = nullptr;
 
   // Desktop i has at least one window if and only if desktops & (1 << i) != 0.
   std::uint32_t desktops = 0;
@@ -35,8 +37,12 @@ struct State {
   std::uint8_t active_desktop = 0;
 };
 
-VWBAR_API void init(HINSTANCE instance);
+VWBAR_API void init(HINSTANCE instance, State& init_state);
 
-VWBAR_API State& get_state();
+VWBAR_API LRESULT handle_message(HWND, UINT msg, WPARAM, LPARAM);
+
+VWBAR_API void destroy();
+
+State& get_state();
 
 } // namespace vwbar
