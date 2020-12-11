@@ -4,7 +4,6 @@
 
 #include "VirtuaWin/messages.h"
 
-#include <cassert>
 #include <cstdio>
 #include <tchar.h>
 
