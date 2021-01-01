@@ -1,11 +1,16 @@
 #include "handler.h"
 
 #include "bar.h"
+#include "logging.h"
+#include "tiling.h"
 
 #include "VirtuaWin/messages.h"
 
-#include <cstdio>
+#include <dwmapi.h>
 #include <tchar.h>
+
+#include <cstdio>
+#include <ios>
 
 namespace {
 
@@ -137,14 +142,40 @@ LRESULT handle_message(const HWND hwnd, const UINT msg, const WPARAM wParam,
   return 0;
 }
 
+void handle_keypress(const MSG& msg) {
+  if (msg.message == WM_HOTKEY) {
+    switch (msg.wParam) {
+      case Command::ToggleTile: {
+        toggle_tile(GetForegroundWindow());
+      } break;
+      case Command::SwitchLeft:
+        switch_window(Command::SwitchLeft);
+        break;
+      case Command::SwitchRight:
+        switch_window(Command::SwitchRight);
+        break;
+      case Command::SwitchUp:
+        switch_window(Command::SwitchUp);
+        break;
+      case Command::SwitchDown:
+        switch_window(Command::SwitchDown);
+        break;
+      default:
+        log_error("Unrecognized key command.");
+    }
+  }
+}
+
 void init(const HINSTANCE instance, State& init_state) {
   state = &init_state;
   state->config = Config(); // Reload config.
   init_bar(*state, instance, state->messaging_hwnd);
+  init_tiling(*state);
 }
 
 void destroy() {
   destroy_bar(*state);
+  destroy_tiling(*state);
   state = nullptr;
 }
 

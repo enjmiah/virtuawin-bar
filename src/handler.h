@@ -7,14 +7,24 @@
 #include <Windows.h>
 
 #include <cstdint>
+#include <vector>
 
-#ifdef VWTILING_EXPORTS
-  #define VWTILING_API extern "C" __declspec(dllexport)
+#ifdef VWTILING_HOT_RELOAD
+  #ifdef VWTILING_EXPORTS
+    #define VWTILING_API extern "C" __declspec(dllexport)
+  #else
+    #define VWTILING_API extern "C" __declspec(dllimport)
+  #endif
 #else
-  #define VWTILING_API extern "C" __declspec(dllimport)
+  #define VWTILING_API
 #endif
 
 namespace vwtiling {
+
+struct TilingState {
+  std::vector<HWND> tiled_windows;
+  std::vector<HWND> floating_windows;
+};
 
 struct State {
   Config config;
@@ -35,11 +45,15 @@ struct State {
                 "cannot store desktop set in an uint32, use uint64 or bigger instead");
   // Index of currently active desktop.
   std::uint8_t active_desktop = 0;
+
+  TilingState tiling;
 };
 
 VWTILING_API void init(HINSTANCE instance, State& init_state);
 
 VWTILING_API LRESULT handle_message(HWND, UINT msg, WPARAM, LPARAM);
+
+VWTILING_API void handle_keypress(const MSG& msg);
 
 VWTILING_API void destroy();
 
