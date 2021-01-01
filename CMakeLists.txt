@@ -4,7 +4,7 @@ project(virtuawin-tiling)
 
 option(HOT_RELOAD "Experimental hot reload support." OFF)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 set(DLL_HEADER_FILES
     src/VirtuaWin/defines.h

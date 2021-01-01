@@ -2,7 +2,6 @@
 
 #include "bar.h"
 #include "logging.h"
-#include "tiling.h"
 
 #include "VirtuaWin/messages.h"
 
@@ -145,9 +144,9 @@ LRESULT handle_message(const HWND hwnd, const UINT msg, const WPARAM wParam,
 void handle_keypress(const MSG& msg) {
   if (msg.message == WM_HOTKEY) {
     switch (msg.wParam) {
-      case Command::ToggleTile: {
+      case Command::ToggleTile:
         toggle_tile(GetForegroundWindow());
-      } break;
+        break;
       case Command::SwitchLeft:
         switch_window(Command::SwitchLeft);
         break;

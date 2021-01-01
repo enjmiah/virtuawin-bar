@@ -77,6 +77,9 @@ BOOL get_floating_windows(std::vector<HWND>& out) {
 namespace vwtiling {
 
 void init_tiling(State&) {
+  if (!RegisterHotKey(nullptr, Command::ToggleTile, MOD_ALT, 0x54)) {
+    log_error("Hotkey 'Alt+T' could not be registered");
+  }
   if (!RegisterHotKey(nullptr, Command::SwitchLeft, MOD_ALT, 0x4A)) {
     log_error("Hotkey 'Alt+J' could not be registered");
   }
@@ -208,17 +211,78 @@ void switch_window(const Command::Code direction) {
   SetForegroundWindow(best_window);
 }
 
-void toggle_tile(HWND active) {
+Window::Window(const HWND hwnd)
+  : window(hwnd) {
+  RECT rect;
+  GetWindowRect(hwnd, &rect);
+  orig_dims.x = rect.left;
+  orig_dims.y = rect.top;
+  orig_dims.width = rect.right - rect.left;
+  orig_dims.height = rect.bottom - rect.top;
+}
+
+Tile::Tile(const HWND w)
+  : window(w) {}
+
+bool Tile::remove_window(const HWND w) {
+  if (window.window == w) {
+    SetWindowPos(w, HWND_TOP, window.orig_dims.x, window.orig_dims.y,
+                 window.orig_dims.width, window.orig_dims.height, 0);
+    window.window = nullptr;
+    return true;
+  }
+  return false;
+}
+
+bool Column::remove_window(const HWND w) {
+  for (auto& tile : tiles) {
+    if (tile.remove_window(w)) {
+      if (tile.empty()) {
+        // TODO: Remove from tiles.
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+void Layout::tile(HWND w) {
+  auto& column = columns.emplace_back();
+  auto& window = column.tiles.emplace_back(w).window;
+  RECT work_area;
+  SystemParametersInfoA(SPI_GETWORKAREA, 0, &work_area, 0);
+  const auto work_height = work_area.bottom - work_area.top;
+  // const auto work_width = work_area.right - work_area.left;
+  const auto& config = get_state().config;
+  SetWindowPos(w, HWND_BOTTOM, window.orig_dims.x, work_area.top + config.outer_gap,
+               window.orig_dims.width, work_height - config.outer_gap, SWP_NOZORDER);
+}
+
+bool Layout::remove_window(const HWND w) {
+  for (auto& column : columns) {
+    if (column.remove_window(w)) {
+      if (column.tiles.empty()) {
+        // TODO: Delete column.
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+void toggle_tile(const HWND active) {
   if (skip_window(active)) {
     log_error("Could not tile current window.");
     return;
   }
-  auto& tiled_windows = get_state().tiling.tiled_windows;
+  auto& tiling = get_state().tiling;
+  auto& tiled_windows = tiling.tiled_windows;
   const auto it = std::find(tiled_windows.begin(), tiled_windows.end(), active);
   if (it == tiled_windows.end()) {
+    tiling.layout.tile(active);
     tiled_windows.push_back(active);
   } else {
-    const auto hwnd = *it;
+    tiling.layout.remove_window(active);
     tiled_windows.erase(it);
   }
 }

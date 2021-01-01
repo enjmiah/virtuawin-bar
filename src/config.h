@@ -29,6 +29,8 @@ struct Config {
   RGBColor highlight_color = RGBColor(117, 190, 195);
   RGBColor inactive_text_color = highlight_color;
   RGBColor active_text_color = background_color;
+
+  int outer_gap = 16;
 };
 
 } // namespace vwtiling

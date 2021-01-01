@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config.h"
+#include "tiling.h"
 
 #include "VirtuaWin/defines.h"
 
@@ -20,11 +21,6 @@
 #endif
 
 namespace vwtiling {
-
-struct TilingState {
-  std::vector<HWND> tiled_windows;
-  std::vector<HWND> floating_windows;
-};
 
 struct State {
   Config config;
