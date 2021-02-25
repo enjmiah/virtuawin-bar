@@ -165,14 +165,20 @@ void resize_client(const State& state) {
   static int old_width = -1;
   auto* const hwnd = state.bar_hwnd;
   if (hwnd && IsWindow(hwnd)) {
-    const auto style = DWORD(GetWindowLongPtr(hwnd, GWL_STYLE));
-    const auto ex_style = DWORD(GetWindowLongPtr(hwnd, GWL_EXSTYLE));
     const auto width = popcount(state.desktops) * (LONG)state.config.label_width;
     if (width != old_width) {
-      RECT rc = {0, 0, width, state.config.height};
-      AdjustWindowRectEx(&rc, style, GetMenu(hwnd) ? TRUE : FALSE, ex_style);
-      SetWindowPos(hwnd, nullptr, 0, 0, rc.right - rc.left, rc.bottom - rc.top,
-                   SWP_NOZORDER | SWP_NOMOVE);
+      LONG screen_width;
+      get_screen_resolution(&screen_width, nullptr);
+      switch (state.config.alignment) {
+        case Config::Alignment::Left:
+          SetWindowPos(hwnd, nullptr, 0, 0, width, state.config.height,
+                       SWP_NOZORDER | SWP_NOMOVE);
+          break;
+        case Config::Alignment::Center:
+          SetWindowPos(hwnd, nullptr, (screen_width - width) / 2, state.config.pad, width,
+                       state.config.height, SWP_NOZORDER);
+          break;
+      }
       old_width = width;
     }
   }
