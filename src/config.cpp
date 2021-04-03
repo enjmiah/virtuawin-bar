@@ -5,12 +5,13 @@
 namespace vwtiling {
 
 Config::Config()
-  : height(26)
+  : corner_radius(0) // TODO: Transparency is janky.
+  , height(26)
   , pad(10)
-  , corner_radius(0) // TODO: Transparency is janky.
   , label_width(height)
   , outer_gap(16)
-  , alignment(Alignment::Center) {
+  , alignment(Alignment::Center)
+  , wraparound(false) {
   DWORD active_caption; // AARRGGBB
   BOOL opaque_blend;
   if (DwmGetColorizationColor(&active_caption, &opaque_blend) == S_OK) {

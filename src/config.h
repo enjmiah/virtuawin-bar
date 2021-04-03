@@ -21,15 +21,16 @@ struct RGBColor {
 struct Config {
   Config();
 
+  float corner_radius;
   int height;
   int pad;
-  float corner_radius;
   int label_width;
   int outer_gap;
   enum class Alignment {
     Left,
     Center,
   } alignment;
+  bool wraparound;
 
   RGBColor background_color = RGBColor(208, 222, 207);
   RGBColor highlight_color = RGBColor(0, 0, 0);

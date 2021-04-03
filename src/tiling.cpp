@@ -11,6 +11,8 @@
 
 namespace {
 
+constexpr auto infinity = std::numeric_limits<double>::infinity();
+
 /**
  * @return Centroid of window.
  */
@@ -153,7 +155,7 @@ void switch_window(const Command::Code direction) {
   }
 
   HWND best_window = active;
-  auto best_score = -std::numeric_limits<double>::infinity();
+  auto best_score = -infinity;
   HWND tiebreaker = nullptr;
   bool tiebreaker_valid = false;
   const auto active_centroid = centroid(active);
@@ -163,9 +165,13 @@ void switch_window(const Command::Code direction) {
     auto disp_x = candidate_centroid.first - active_centroid.first;
     auto disp_y = candidate_centroid.second - active_centroid.second;
     if (disp_x * search_direction.first + disp_y * search_direction.second < 0.f) {
-      // Consider the window's displacement as if the screen wrapped around
-      disp_x += wraparound.first;
-      disp_y += wraparound.second;
+      if (state.config.wraparound) {
+        // Consider the window's displacement as if the screen wrapped around
+        disp_x += wraparound.first;
+        disp_y += wraparound.second;
+      } else {
+        disp_x = disp_y = infinity;
+      }
     }
     if (disp_x == 0.f && disp_y == 0.f) {
       if (candidate == active) {
