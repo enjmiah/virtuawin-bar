@@ -8,10 +8,14 @@
 
 #include <cstdint>
 
-#ifdef VWBAR_EXPORTS
-  #define VWBAR_API extern "C" __declspec(dllexport)
+#ifdef VWBAR_HOT_RELOAD
+  #ifdef VWBAR_EXPORTS
+    #define VWBAR_API extern "C" __declspec(dllexport)
+  #else
+    #define VWBAR_API extern "C" __declspec(dllimport)
+  #endif
 #else
-  #define VWBAR_API extern "C" __declspec(dllimport)
+  #define VWBAR_API
 #endif
 
 namespace vwbar {

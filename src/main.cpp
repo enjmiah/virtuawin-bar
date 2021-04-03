@@ -1,6 +1,7 @@
 #include "handler.h"
 
-#include <string>
+#include <ctime>
+#include <sstream>
 
 namespace vb = ::vwbar;
 
@@ -9,43 +10,55 @@ constexpr auto module_name_exe = "virtuawin-bar.exe";
 
 struct Module {
   vb::State state;
+#ifdef VWBAR_HOT_RELOAD
   HMODULE dll = nullptr;
+  FILETIME load_time;
+#endif
   decltype(&vb::init) init;
   decltype(&vb::destroy) destroy;
   decltype(&vb::handle_message) handle_message;
-  FILETIME load_time;
 } mod;
 
 bool dynamic_load_module(Module& mod, const HINSTANCE instance,
                          const std::wstring& dll_path) {
-  const auto new_path = dll_path + std::wstring(L".tmp");
+#ifdef VWBAR_HOT_RELOAD
+  std::wstringstream ss;
+  ss << dll_path << L".tmp" << std::time(nullptr);
+  const auto new_path = ss.str();
   CopyFileW(dll_path.c_str(), new_path.c_str(), FALSE);
   mod.dll = LoadLibraryW(new_path.c_str());
   if (!mod.dll) {
     MessageBoxA(nullptr, "Could not load vwbar.dll", nullptr, MB_OK);
     return false;
   }
-  mod.init = (decltype(&vb::init))GetProcAddress(mod.dll, "init");
+  mod.init = (decltype(&vt::init))GetProcAddress(mod.dll, "init");
   if (!mod.init) {
     MessageBoxA(nullptr, "Could not load vwbar.dll:init", nullptr, MB_OK);
     return false;
   }
-  mod.destroy = (decltype(&vb::destroy))GetProcAddress(mod.dll, "destroy");
+  mod.destroy = (decltype(&vt::destroy))GetProcAddress(mod.dll, "destroy");
   if (!mod.destroy) {
     MessageBoxA(nullptr, "Could not load vwbar.dll:destroy", nullptr, MB_OK);
     return false;
   }
   mod.handle_message =
-    (decltype(&vb::handle_message))GetProcAddress(mod.dll, "handle_message");
+    (decltype(&vt::handle_message))GetProcAddress(mod.dll, "handle_message");
   if (!mod.handle_message) {
     MessageBoxA(nullptr, "Could not load vwbar.dll:handle_message", nullptr, MB_OK);
     return false;
   }
+#else
+  mod.init = vb::init;
+  mod.destroy = vb::destroy;
+  mod.handle_message = vb::handle_message;
+#endif
 
   mod.init(instance, mod.state);
 
   return true;
 }
+
+#ifdef VWBAR_HOT_RELOAD
 
 bool dynamic_unload_module(Module& mod) {
   mod.destroy();
@@ -78,6 +91,8 @@ LRESULT delegate_message(const HWND hwnd, const UINT msg, const WPARAM wparam,
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
+#endif
+
 int WINAPI WinMain(const HINSTANCE instance, HINSTANCE /*prev*/, LPSTR /*args*/,
                    const int) {
   // Create invisible parent window for receiving messages.
@@ -86,13 +101,18 @@ int WINAPI WinMain(const HINSTANCE instance, HINSTANCE /*prev*/, LPSTR /*args*/,
   // the window.
   wc.lpszClassName = module_name_exe;
   wc.hInstance = instance;
+#ifdef VWBAR_HOT_RELOAD
   wc.lpfnWndProc = delegate_message;
+#else
+  wc.lpfnWndProc = vb::handle_message;
+#endif
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   RegisterClass(&wc);
   mod.state.messaging_hwnd = CreateWindowA(wc.lpszClassName, module_name, NULL, 0, 0, 0,
                                            0, nullptr, nullptr, instance, nullptr);
 
   std::wstring dll_path;
+#ifdef VWBAR_HOT_RELOAD
   {
     wchar_t dll_path_buffer[MAX_PATH];
     GetModuleFileNameW(nullptr, dll_path_buffer, MAX_PATH);
@@ -108,27 +128,34 @@ int WINAPI WinMain(const HINSTANCE instance, HINSTANCE /*prev*/, LPSTR /*args*/,
     }
     dll_path = dll_path_buffer;
   }
-
   mod.load_time = get_last_modified(dll_path);
+#endif
   if (!dynamic_load_module(mod, instance, dll_path)) {
     return 1;
   }
 
   MSG msg;
-  while (GetMessage(&msg, nullptr, 0, 0) > 0) {
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
+  BOOL ok;
+  while ((ok = GetMessage(&msg, nullptr, 0, 0)) != 0) {
+    if (ok) {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
 
-    auto last_write_time = get_last_modified(dll_path);
-    if (CompareFileTime(&last_write_time, &mod.load_time) == 1) {
-      mod.load_time = last_write_time;
-      if (!dynamic_unload_module(mod)) {
-        MessageBoxA(nullptr, "Could not unload vwbar.dll", nullptr, MB_OK);
-        return 2;
+#ifdef VWBAR_HOT_RELOAD
+      auto last_write_time = get_last_modified(dll_path);
+      if (CompareFileTime(&last_write_time, &mod.load_time) == 1) {
+        mod.load_time = last_write_time;
+        if (!dynamic_unload_module(mod)) {
+          MessageBoxA(nullptr, "Could not unload vwbar.dll", nullptr, MB_OK);
+          return 2;
+        }
+        if (!dynamic_load_module(mod, instance, dll_path)) {
+          return 1;
+        }
       }
-      if (!dynamic_load_module(mod, instance, dll_path)) {
-        return 1;
-      }
+#endif
+    } else {
+      OutputDebugStringA("GetMessage failed.");
     }
   }
 
