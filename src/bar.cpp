@@ -10,15 +10,13 @@
 #include <cstdint>
 #include <cstdio>
 
-using namespace ::std;
-
 namespace {
 
 /// Return the number of bits set in v.
-int popcount(std::uint32_t v) {
-  int c; // c accumulates the total bits set in v
-  for (c = 0; v; c++) {
-    v &= v - 1; // clear the least significant bit set
+int popcount(uint32_t v) {
+  int c = 0; // c accumulates the total bits set in v.
+  for (; v; c++) {
+    v &= v - 1; // Clear the least significant bit set.
   }
   return c;
 }

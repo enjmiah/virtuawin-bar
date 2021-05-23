@@ -23,10 +23,8 @@ set(EXE_SOURCE_FILES
 )
 
 # Disable exceptions and RTTI.
-message(STATUS "CMAKE_CXX_FLAGS are ${CMAKE_CXX_FLAGS}")
 string(REGEX REPLACE "/EH[a-z]+" "/EHs-c-" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 string(REGEX REPLACE "/GR" "/GR-" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-message(STATUS "CMAKE_CXX_FLAGS are ${CMAKE_CXX_FLAGS}")
 
 if (HOT_RELOAD)
     set(CORE ${PROJECT_NAME}-dll)
