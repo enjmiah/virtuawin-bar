@@ -7,7 +7,6 @@ set(HEADER_FILES
     src/cairo-array-private.h
     src/cairo-atomic-private.h
     src/cairo-backend-private.h
-    src/cairo-beos.h
     src/cairo-boxes-private.h
     src/cairo-box-inline.h
     src/cairo-cache-private.h
@@ -34,7 +33,6 @@ set(HEADER_FILES
     src/cairo-freelist-type-private.h
     src/cairo-gstate-private.h
     src/cairo-hash-private.h
-    src/cairo-image-info-private.h
     src/cairo-image-surface-inline.h
     src/cairo-image-surface-private.h
     src/cairoint.h
@@ -82,8 +80,6 @@ set(HEADER_FILES
     src/cairo-surface-subsurface-inline.h
     src/cairo-surface-subsurface-private.h
     src/cairo-surface-wrapper-private.h
-    src/cairo-tag-attributes-private.h
-    src/cairo-tag-stack-private.h
     src/cairo-tee-surface-private.h
     src/cairo-time-private.h
     src/cairo-traps-private.h
@@ -97,10 +93,6 @@ set(HEADER_FILES
     src/cairo-wideint-private.h
     src/cairo-wideint-type-private.h
     src/cairo-win32.h
-    src/test-compositor-surface.h
-    src/test-compositor-surface-private.h
-    src/test-null-compositor-surface.h
-    src/test-paginated-surface.h
     src/win32/cairo-win32-private.h)
 
 set(SOURCE_FILES
@@ -109,8 +101,6 @@ set(SOURCE_FILES
     src/cairo-arc.c
     src/cairo-array.c
     src/cairo-atomic.c
-    src/cairo-base64-stream.c
-    src/cairo-base85-stream.c
     src/cairo-bentley-ottmann.c
     src/cairo-bentley-ottmann-rectangular.c
     src/cairo-bentley-ottmann-rectilinear.c
@@ -132,7 +122,6 @@ set(SOURCE_FILES
     src/cairo-damage.c
     src/cairo-debug.c
     src/cairo-default-context.c
-    src/cairo-deflate-stream.c
     src/cairo-device.c
     src/cairo-error.c
     src/cairo-fallback-compositor.c
@@ -147,7 +136,6 @@ set(SOURCE_FILES
     src/cairo-hash.c
     src/cairo-hull.c
     src/cairo-image-compositor.c
-    src/cairo-image-info.c
     src/cairo-image-source.c
     src/cairo-image-surface.c
     src/cairo-line.c
@@ -201,8 +189,6 @@ set(SOURCE_FILES
     src/cairo-surface-snapshot.c
     src/cairo-surface-subsurface.c
     src/cairo-surface-wrapper.c
-    src/cairo-tag-attributes.c
-    src/cairo-tag-stack.c
     src/cairo-time.c
     src/cairo-tor22-scan-converter.c
     src/cairo-tor-scan-converter.c
@@ -219,17 +205,10 @@ set(SOURCE_FILES
     src/cairo-user-font.c
     src/cairo-version.c
     src/cairo-wideint.c
-    src/check-link.c
-    src/test-base-compositor-surface.c
-    src/test-compositor-surface.c
-    src/test-null-compositor-surface.c
-    src/test-paginated-surface.c
-    src/win32/cairo-win32-debug.c
     src/win32/cairo-win32-device.c
     src/win32/cairo-win32-display-surface.c
     src/win32/cairo-win32-font.c
     src/win32/cairo-win32-gdi-compositor.c
-    src/win32/cairo-win32-printing-surface.c
     src/win32/cairo-win32-surface.c
     src/win32/cairo-win32-system.c)
 
