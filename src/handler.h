@@ -34,11 +34,11 @@ struct State {
   HWND bar_hwnd = nullptr;
 
   // Desktop i has at least one window if and only if desktops & (1 << i) != 0.
-  std::uint32_t desktops = 0;
+  uint32_t desktops = 0;
   static_assert(vwDESKTOP_MAX < 32,
                 "cannot store desktop set in an uint32, use uint64 or bigger instead");
   // Index of currently active desktop.
-  std::uint8_t active_desktop = 0;
+  uint8_t active_desktop = 0;
 };
 
 VWBAR_API void init(HINSTANCE instance, State& init_state);

@@ -1,11 +1,11 @@
 <h1 align="center">virtuawin-bar</h1>
 
-**`virtuawin-bar`** is a [VirtuaWin](https://virtuawin.sourceforge.io/) module
+_**virtuawin-bar**_ is a [VirtuaWin](https://virtuawin.sourceforge.io/) module
 which lists all of the non-empty virtual desktops, and highlights the currently
 active one.  It is aesthetically similar to status bars designed to work with
 tiling window managers, like i3bar and Polybar.
 
-`virtuawin-bar` is light on system resources, and uses less than 1 MB of memory
+*virtuawin-bar* is light on system resources, and uses less than 1 MB of memory
 and negligible CPU time when idle.
 
 ![](docs/bar_taskmgr.png)
@@ -60,7 +60,7 @@ TODO:
 Limitations
 -----------
 
-`virtuawin-bar` only refreshes when you switch to a new desktop — to save
+*virtuawin-bar* only refreshes when you switch to a new desktop — to save
 resources, it does *not* poll for changes.  VirtuaWin (currently) does not
 support setting a handler in response to when you move a window to an empty
 desktop, thus when doing so, the bar display will be out of date until the next

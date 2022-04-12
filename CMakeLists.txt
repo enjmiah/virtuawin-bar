@@ -60,3 +60,7 @@ target_link_libraries(${CORE} PRIVATE dwmapi shlwapi)
 # Use our bundled Cairo.
 add_subdirectory(3rdparty/Cairo)
 target_link_libraries(${CORE} PUBLIC Cairo)
+
+# Use our bundled third-party INI reader.
+add_subdirectory(3rdparty/inih)
+target_link_libraries(${CORE} PUBLIC inih)

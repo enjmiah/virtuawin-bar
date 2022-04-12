@@ -1,11 +1,18 @@
 #pragma once
 
+#include <stdint.h>
+
 namespace vwbar {
 
 struct RGBColor {
   float r;
   float g;
   float b;
+
+  RGBColor()
+    : r(0)
+    , g(0)
+    , b(0) {}
 
   RGBColor(float r_, float g_, float b_)
     : r(r_)
@@ -16,9 +23,15 @@ struct RGBColor {
     : r(r_ / 255.f)
     , g(g_ / 255.f)
     , b(b_ / 255.f) {}
+
+  RGBColor(uint32_t rgb)
+    : r(((rgb >> 16) & 0xff) / 255.f)
+    , g(((rgb >> 8) & 0xff) / 255.f)
+    , b((rgb & 0xff) / 255.f) {}
 };
 
 struct Config {
+  /** Create a config using the defaults. */
   Config();
 
   int height;
@@ -31,10 +44,13 @@ struct Config {
     Center,
   } alignment;
 
-  RGBColor background_color = RGBColor(208, 222, 207);
-  RGBColor highlight_color = RGBColor(0, 0, 0);
+  RGBColor background_color = RGBColor(255, 255, 255);
+  RGBColor highlight_color;
   RGBColor inactive_text_color = highlight_color;
   RGBColor active_text_color = background_color;
 };
+
+int config_entry_handler(void* config, const char* section, const char* name,
+                         const char* value);
 
 } // namespace vwbar

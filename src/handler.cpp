@@ -4,6 +4,10 @@
 
 #include "VirtuaWin/messages.h"
 
+#include <ShlObj.h>
+#include <Shlwapi.h>
+#include <ini.h>
+
 #include <cstdio>
 
 namespace {
@@ -135,7 +139,20 @@ LRESULT handle_message(const HWND hwnd, const UINT msg, const WPARAM wParam,
 
 void init(const HINSTANCE instance, State& init_state) {
   state = &init_state;
-  state->config = Config(); // Reload config.
+
+  state->config = Config(); // Reset config.
+  // Try to load config from user's config file.
+  TCHAR config_path[MAX_PATH];
+  if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, config_path)) &&
+      PathAppend(config_path, TEXT("vwbar.ini"))) {
+    // MessageBox(NULL, config_path, TEXT("vwbar"), MB_ICONINFORMATION);
+    FILE* f = _wfopen(config_path, L"r");
+    if (f) {
+      ini_parse_file(f, config_entry_handler, &state->config);
+      fclose(f);
+    }
+  }
+
   init_bar(*state, instance, state->messaging_hwnd);
 }
 
