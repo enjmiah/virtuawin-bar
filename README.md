@@ -54,7 +54,9 @@ See the [official documentation on modules][vwmodules] for details.
 Configuration
 -------------
 
-TODO:
+*virtuawin-bar* can be configured using a configuration file located at
+`%APPDATA%/vwbar.ini`.  See [`docs/vwbar.ini`](docs/vwbar.ini) for documentation
+and an example configuration file.
 
 
 Limitations
