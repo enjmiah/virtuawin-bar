@@ -130,7 +130,7 @@ void get_screen_resolution(LONG* out_width, LONG* out_height) {
 namespace vwbar {
 
 void init_bar(State& state, const HINSTANCE instance, const HWND parent) {
-  constexpr auto module_name = _T("vwbar");
+  constexpr auto module_name = TEXT("vwbar");
   WNDCLASS wc = {0};
   wc.lpszClassName = module_name;
   wc.hInstance = instance;

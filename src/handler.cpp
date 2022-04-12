@@ -5,7 +5,6 @@
 #include "VirtuaWin/messages.h"
 
 #include <cstdio>
-#include <tchar.h>
 
 namespace {
 
@@ -53,7 +52,7 @@ LRESULT handle_message(const HWND hwnd, const UINT msg, const WPARAM wParam,
       // The handle to VirtuaWin comes in the wParam.
       state->vw_handle = (HWND)wParam;
       if (!state->vw_handle) {
-        MessageBox(hwnd, _T("Failed to get handle to VirtuaWin."), _T("Module Error"),
+        MessageBox(hwnd, TEXT("Failed to get handle to VirtuaWin."), TEXT("Module Error"),
                    MB_ICONWARNING);
         exit(1);
       }
@@ -66,8 +65,8 @@ LRESULT handle_message(const HWND hwnd, const UINT msg, const WPARAM wParam,
         // TODO: Is a delay necessary here?
         if ((state->initialized & 2) == 0) {
           MessageBox(hwnd,
-                     _T("VirtuaWin failed to send the UserApp path to VirtaWin Bar."),
-                     _T("Module Error"), MB_ICONWARNING);
+                     TEXT("VirtuaWin failed to send the UserApp path to VirtaWin Bar."),
+                     TEXT("Module Error"), MB_ICONWARNING);
           exit(1);
         }
       }
@@ -86,11 +85,8 @@ LRESULT handle_message(const HWND hwnd, const UINT msg, const WPARAM wParam,
           return FALSE;
         }
         state->initialized |= 2;
-#ifdef _UNICODE
-        MultiByteToWideChar(CP_ACP, 0, (char*)cds->lpData, -1, user_app_path, MAX_PATH);
-#else
-        strncpy(state->user_app_path, (char*)cds->lpData, MAX_PATH);
-#endif
+        MultiByteToWideChar(CP_ACP, 0, (char*)cds->lpData, -1, state->user_app_path,
+                            MAX_PATH);
         state->user_app_path[MAX_PATH - 1] = '\0';
       }
       return TRUE;
@@ -117,10 +113,10 @@ LRESULT handle_message(const HWND hwnd, const UINT msg, const WPARAM wParam,
     case MOD_SETUP: {
       // Displays when user presses Setup > Modules > Configure.
       TCHAR message[64 + MAX_PATH];
-      snprintf(message, 64 + MAX_PATH,
-               "The configuration file for virtuawin-bar is located at %sbar.json",
-               state->user_app_path);
-      MessageBox(hwnd, message, "virtuawin-bar", MB_ICONINFORMATION);
+      _snwprintf(message, 64 + MAX_PATH,
+                 L"The configuration file for virtuawin-bar is located at %sbar.ini",
+                 state->user_app_path);
+      MessageBox(hwnd, message, TEXT("virtuawin-bar"), MB_ICONINFORMATION);
     } break;
 
     case MOD_QUIT: // This must be handled, otherwise VirtuaWin can't shut down the

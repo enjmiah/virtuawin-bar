@@ -5,8 +5,8 @@
 
 namespace vb = ::vwbar;
 
-constexpr auto module_name = "virtuawin-bar";
-constexpr auto module_name_exe = "virtuawin-bar.exe";
+constexpr auto module_name = TEXT("virtuawin-bar");
+constexpr auto module_name_exe = TEXT("virtuawin-bar.exe");
 
 struct Module {
   vb::State state;
@@ -108,8 +108,8 @@ int WINAPI WinMain(const HINSTANCE instance, HINSTANCE /*prev*/, LPSTR /*args*/,
 #endif
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   RegisterClass(&wc);
-  mod.state.messaging_hwnd = CreateWindowA(wc.lpszClassName, module_name, NULL, 0, 0, 0,
-                                           0, nullptr, nullptr, instance, nullptr);
+  mod.state.messaging_hwnd = CreateWindow(wc.lpszClassName, module_name, NULL, 0, 0, 0, 0,
+                                          nullptr, nullptr, instance, nullptr);
 
   std::wstring dll_path;
 #ifdef VWBAR_HOT_RELOAD

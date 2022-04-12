@@ -28,11 +28,11 @@ modules][vwmodules] for details.
 
 ### Building from source
 
-`virtuawin-bar` requires a C++14 compiler, CMake, and [Cairo][cairo].  For
-convenience, (a subset of) Cairo is included in this repository under
-`3rdparty`, and will be used if it is not detected on your system.
+*virtuawin-bar* requires a C++14 compiler and CMake.  The third-party libraries
+[inih](https://github.com/benhoyt/inih) and a subset of [Cairo][cairo] have been
+included in this repository under `3rdparty` for convenience.
 
-Create a build folder, and run CMake from there:
+Create a build folder and run CMake from there:
 
     mkdir build && cd build
     cmake ..
@@ -41,10 +41,11 @@ Finally, to build the code:
 
     cmake --build . --config Release
 
-This will produce `virtuawin-bar.exe`, a VirtuaWin module.  Copy the executable
-plus all of its required DLLs into the `modules` directory of your VirtuaWin
-installation to install it.  See the [official documentation on
-modules][vwmodules] for details.
+This will produce `virtuawin-bar.exe`, a VirtuaWin module. Copy the executable
+into the `modules` directory of your VirtuaWin installation to install it. By
+default, the build is configured to statically-link to Cairo and inih; if you
+switch to dynamic linking, you will also need to copy over the necessary DLLs.
+See the [official documentation on modules][vwmodules] for details.
 
 [cairo]: https://www.cairographics.org/
 [vwmodules]: https://virtuawin.sourceforge.io/?page_id=50

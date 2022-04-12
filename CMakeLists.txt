@@ -23,8 +23,8 @@ set(EXE_SOURCE_FILES
 )
 
 # Disable exceptions and RTTI.
-string(REGEX REPLACE "/EH[a-z]+" "/EHs-c-" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-string(REGEX REPLACE "/GR" "/GR-" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+string(REGEX REPLACE "/EH[a-z]+" "/EHs-c-" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REGEX REPLACE "/GR" "/GR-" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 if (HOT_RELOAD)
     set(CORE ${PROJECT_NAME}-dll)
@@ -44,6 +44,7 @@ else()
 endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS)
 target_compile_definitions(${PROJECT_NAME} PRIVATE _HAS_EXCEPTIONS=0)
+target_compile_definitions(${PROJECT_NAME} PRIVATE UNICODE)
 target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 
 source_group(TREE ${PROJECT_SOURCE_DIR}
@@ -54,19 +55,8 @@ source_group(TREE ${PROJECT_SOURCE_DIR}
 # Third-party #
 ###############
 
-target_link_libraries(${CORE} PRIVATE dwmapi)
+target_link_libraries(${CORE} PRIVATE dwmapi shlwapi)
 
-find_package(Cairo QUIET)
-if (Cairo_FOUND)
-    target_link_libraries(${CORE} PUBLIC Cairo::Cairo)
-else()
-    # Try to use the vcpkg version of Cairo.
-    find_package(unofficial-cairo CONFIG QUIET)
-    if (unofficial-cairo_FOUND)
-        target_link_libraries(${CORE} PUBLIC unofficial::cairo::cairo)
-    else()
-        # Use our bundled Cairo.
-        add_subdirectory(3rdparty/Cairo)
-        target_link_libraries(${CORE} PUBLIC Cairo)
-    endif()
-endif()
+# Use our bundled Cairo.
+add_subdirectory(3rdparty/Cairo)
+target_link_libraries(${CORE} PUBLIC Cairo)
