@@ -19,8 +19,8 @@ Config::Config()
   , pad(10)
   , corner_radius(0) // TODO: Transparency is janky.
   , label_width(height)
-  , outer_gap(16)
-  , alignment(Alignment::Center) {
+  , alignment(Alignment::Center)
+  , bottom(false) {
 
   get_accent_color(&highlight_color);
   inactive_text_color = highlight_color;
@@ -37,15 +37,21 @@ int config_entry_handler(void* user, const char* section, const char* name,
     config->pad = atoi(value);
   } else if (MATCH("geometry", "label_width")) {
     config->label_width = atoi(value);
-  } else if (MATCH("geometry", "outer_gap")) {
-    config->outer_gap = atoi(value);
   } else if (MATCH("geometry", "alignment")) {
     if (strcmp(value, "left") == 0) {
       config->alignment = Config::Alignment::Left;
     } else if (strcmp(value, "center") == 0) {
       config->alignment = Config::Alignment::Center;
     } else if (strcmp(value, "right") == 0) {
-      // TODO:
+      config->alignment = Config::Alignment::Right;
+    } else {
+      return 0; // Error: unrecognized.
+    }
+  } else if (MATCH("geometry", "bottom")) {
+    if (strcmp(value, "true") == 0) {
+      config->bottom = true;
+    } else if (strcmp(value, "false") == 0) {
+      config->bottom = false;
     } else {
       return 0; // Error: unrecognized.
     }

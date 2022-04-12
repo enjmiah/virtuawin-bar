@@ -28,7 +28,7 @@ void draw_bar(cairo_t* const cr) {
   const auto& config = state.config;
   const auto radius = config.corner_radius;
   const auto n_desktops = popcount(state.desktops);
-  const auto width = n_desktops * config.height;
+  const auto width = n_desktops * config.label_width;
 
   cairo_new_sub_path(cr);
   cairo_arc(cr, width - radius, radius, radius, -90 * degrees, 0 * degrees);
@@ -140,11 +140,9 @@ void init_bar(State& state, const HINSTANCE instance, const HWND parent) {
 
   LONG screen_height;
   get_screen_resolution(nullptr, &screen_height);
-  const auto& config = state.config;
-  auto* const hwnd = CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, wc.lpszClassName,
-                                    module_name, WS_POPUP | WS_VISIBLE, config.pad,
-                                    screen_height - config.height - config.pad, 0, 0,
-                                    parent, nullptr, instance, nullptr);
+  auto* const hwnd =
+    CreateWindowEx(WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, wc.lpszClassName, module_name,
+                   WS_POPUP | WS_VISIBLE, 0, 0, 0, 0, parent, nullptr, instance, nullptr);
   state.bar_hwnd = hwnd;
   SetWindowLong(hwnd, GWL_STYLE, 0); // Remove title bar and border.
   resize_client(state);
@@ -163,18 +161,27 @@ void resize_client(const State& state) {
   static int old_width = -1;
   auto* const hwnd = state.bar_hwnd;
   if (hwnd && IsWindow(hwnd)) {
-    const auto width = popcount(state.desktops) * (LONG)state.config.label_width;
-    if (width != old_width) {
+    const auto n_desktops = popcount(state.desktops);
+    const auto width = n_desktops * (LONG)state.config.label_width;
+    if (width != old_width) { // FIXME: Also needed if screen resolution changes!
       LONG screen_width;
-      get_screen_resolution(&screen_width, nullptr);
+      LONG screen_height;
+      get_screen_resolution(&screen_width, &screen_height);
+      const auto ypos =
+        (state.config.bottom ? screen_height - state.config.pad - state.config.height
+                             : state.config.pad);
       switch (state.config.alignment) {
         case Config::Alignment::Left:
-          SetWindowPos(hwnd, nullptr, 0, 0, width, state.config.height,
-                       SWP_NOZORDER | SWP_NOMOVE);
+          SetWindowPos(hwnd, nullptr, state.config.pad, ypos, width, state.config.height,
+                       SWP_NOZORDER);
           break;
         case Config::Alignment::Center:
-          SetWindowPos(hwnd, nullptr, (screen_width - width) / 2, state.config.pad, width,
+          SetWindowPos(hwnd, nullptr, (screen_width - width) / 2, ypos, width,
                        state.config.height, SWP_NOZORDER);
+          break;
+        case Config::Alignment::Right:
+          SetWindowPos(hwnd, nullptr, screen_width - width - state.config.pad, ypos,
+                       width, state.config.height, SWP_NOZORDER);
           break;
       }
       old_width = width;

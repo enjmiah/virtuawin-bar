@@ -38,11 +38,12 @@ struct Config {
   int pad;
   float corner_radius;
   int label_width;
-  int outer_gap;
   enum class Alignment {
     Left,
     Center,
+    Right,
   } alignment;
+  bool bottom;
 
   RGBColor background_color = RGBColor(255, 255, 255);
   RGBColor highlight_color;
