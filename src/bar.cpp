@@ -7,8 +7,8 @@
 #include <cairo-win32.h>
 #include <tchar.h>
 
-#include <cstdint>
-#include <cstdio>
+#include <stdint.h>
+#include <stdio.h>
 
 namespace {
 
@@ -66,7 +66,10 @@ void draw_bar(cairo_t* const cr) {
       cairo_fill(cr);
     }
     cairo_set_source_rgb(cr, text_color.r, text_color.g, text_color.b);
-    cairo_set_font_size(cr, 0.45 * config.height);
+    cairo_set_font_size(
+      cr,
+      // Let's not include <algorithm> just for the sake of `min`...
+      0.45 * (config.height < config.label_width ? config.height : config.label_width));
     cairo_select_font_face(cr, "Segoe UI", CAIRO_FONT_SLANT_NORMAL,
                            CAIRO_FONT_WEIGHT_BOLD);
     char label_text[16];
