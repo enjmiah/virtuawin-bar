@@ -32,6 +32,8 @@ struct Config {
   /** Create a config using the defaults. */
   Config();
 
+  // [geometry]
+
   int height;
   int pad;
   float corner_radius;
@@ -43,10 +45,17 @@ struct Config {
   } alignment;
   bool bottom;
 
+  // [colors]
+
   RGBColor background_color = RGBColor(255, 255, 255);
   RGBColor highlight_color;
   RGBColor inactive_text_color = highlight_color;
   RGBColor active_text_color = background_color;
+
+  // [keybinds]
+
+  bool window_switch = false;
+  bool window_switch_wrap = false;
 };
 
 int config_entry_handler(void* config, const char* section, const char* name,

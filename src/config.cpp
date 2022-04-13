@@ -29,6 +29,18 @@ int config_entry_handler(void* user, const char* section, const char* name,
   Config* config = (Config*)user;
 
 #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+
+#define HANDLE_BOOL(attr)                                                                \
+  do {                                                                                   \
+    if (strcmp(value, "true") == 0) {                                                    \
+      attr = true;                                                                       \
+    } else if (strcmp(value, "false") == 0) {                                            \
+      attr = false;                                                                      \
+    } else {                                                                             \
+      return 0; /* Error: unrecognized. */                                               \
+    }                                                                                    \
+  } while (0)
+
   if (MATCH("geometry", "height")) {
     config->height = atoi(value);
   } else if (MATCH("geometry", "pad")) {
@@ -46,13 +58,7 @@ int config_entry_handler(void* user, const char* section, const char* name,
       return 0; // Error: unrecognized.
     }
   } else if (MATCH("geometry", "bottom")) {
-    if (strcmp(value, "true") == 0) {
-      config->bottom = true;
-    } else if (strcmp(value, "false") == 0) {
-      config->bottom = false;
-    } else {
-      return 0; // Error: unrecognized.
-    }
+    HANDLE_BOOL(config->bottom);
   } else if (MATCH("colors", "background")) {
     if (strlen(value) == 7 && value[0] == '#') {
       config->background_color = strtol(value + 1, nullptr, 16);
@@ -81,6 +87,10 @@ int config_entry_handler(void* user, const char* section, const char* name,
     } else {
       return 0; // Error: invalid colour.
     }
+  } else if (MATCH("keybinds", "window_switch")) {
+    HANDLE_BOOL(config->window_switch);
+  } else if (MATCH("keybinds", "wraparound")) {
+    HANDLE_BOOL(config->window_switch_wrap);
   } else {
     return 0; /* unknown section/name, error */
   }

@@ -116,16 +116,6 @@ static LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
   return 0;
 }
 
-static void get_screen_resolution(LONG* out_width, LONG* out_height) {
-  auto* const desktop = GetDesktopWindow();
-  RECT rect;
-  GetWindowRect(desktop, &rect);
-  if (out_width)
-    *out_width = rect.right;
-  if (out_height)
-    *out_height = rect.bottom;
-}
-
 void init_bar(State& state, const HINSTANCE instance, const HWND parent) {
   constexpr auto module_name = TEXT("vwbar");
   WNDCLASS wc = {0};

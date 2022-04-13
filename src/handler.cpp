@@ -1,6 +1,7 @@
 #include "handler.h"
 
 #include "bar.h"
+#include "movement.h"
 
 #include "VirtuaWin/messages.h"
 
@@ -8,7 +9,7 @@
 #include <Shlwapi.h>
 #include <ini.h>
 
-#include <cstdio>
+#include <stdio.h>
 
 static State* state = nullptr;
 
@@ -34,7 +35,7 @@ __inline BOOL CALLBACK enum_windows_proc(const HWND hwnd, const LPARAM desk_coun
   return TRUE;
 }
 
-void update_desktop_set() {
+static void update_desktop_set() {
   state->desktops = 0; // Clear.
   const auto desk_count = SendMessage(state->vw_handle, VW_DESKX, 0, 0) *
                           SendMessage(state->vw_handle, VW_DESKY, 0, 0);
@@ -148,11 +149,58 @@ void init(const HINSTANCE instance, State& init_state) {
   }
 
   init_bar(*state, instance, state->messaging_hwnd);
+
+  if (state->config.window_switch) {
+    if (!RegisterHotKey(nullptr, Command::SwitchLeft, MOD_ALT, 0x4A)) {
+      OutputDebugStringA("Hotkey 'Alt+J' could not be registered.\n");
+    }
+    if (!RegisterHotKey(nullptr, Command::SwitchRight, MOD_ALT, VK_OEM_1)) {
+      OutputDebugStringA("Hotkey 'Alt+;' could not be registered.\n");
+    }
+    if (!RegisterHotKey(nullptr, Command::SwitchUp, MOD_ALT, 0x4C)) {
+      OutputDebugStringA("Hotkey 'Alt+L' could not be registered.\n");
+    }
+    if (!RegisterHotKey(nullptr, Command::SwitchDown, MOD_ALT, 0x4B)) {
+      OutputDebugStringA("Hotkey 'Alt+K' could not be registered.\n");
+    }
+  }
+}
+
+void handle_keypress(const MSG& msg) {
+  if (msg.message == WM_HOTKEY) {
+    switch (msg.wParam) {
+      case Command::SwitchLeft:
+      case Command::SwitchRight:
+      case Command::SwitchUp:
+      case Command::SwitchDown:
+        switch_window((Command::Code)msg.wParam);
+        break;
+
+      default:
+        OutputDebugStringA("Unrecognized key command.\n");
+    }
+  }
 }
 
 void destroy() {
+  if (state->config.window_switch) {
+    UnregisterHotKey(nullptr, Command::SwitchLeft);
+    UnregisterHotKey(nullptr, Command::SwitchRight);
+    UnregisterHotKey(nullptr, Command::SwitchUp);
+    UnregisterHotKey(nullptr, Command::SwitchDown);
+  }
   destroy_bar(*state);
   state = nullptr;
 }
 
 State& get_state() { return *state; }
+
+void get_screen_resolution(LONG* out_width, LONG* out_height) {
+  auto* const desktop = GetDesktopWindow();
+  RECT rect;
+  GetWindowRect(desktop, &rect);
+  if (out_width)
+    *out_width = rect.right;
+  if (out_height)
+    *out_height = rect.bottom;
+}

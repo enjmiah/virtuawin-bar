@@ -11,12 +11,14 @@ struct Module {
   decltype(&init) init;
   decltype(&destroy) destroy;
   decltype(&handle_message) handle_message;
+  decltype(&handle_keypress) handle_keypress;
 } mod;
 
-bool dynamic_load_module(Module& mod, const HINSTANCE instance) {
+bool dynamic_load_module(const HINSTANCE instance) {
   mod.init = init;
   mod.destroy = destroy;
   mod.handle_message = handle_message;
+  mod.handle_keypress = handle_keypress;
   mod.init(instance, mod.state);
 
   return true;
@@ -36,7 +38,7 @@ int WINAPI WinMain(const HINSTANCE instance, HINSTANCE /*prev*/, LPSTR /*args*/,
   mod.state.messaging_hwnd = CreateWindow(wc.lpszClassName, module_name, NULL, 0, 0, 0, 0,
                                           nullptr, nullptr, instance, nullptr);
 
-  if (!dynamic_load_module(mod, instance)) {
+  if (!dynamic_load_module(instance)) {
     return 1;
   }
 
@@ -44,9 +46,9 @@ int WINAPI WinMain(const HINSTANCE instance, HINSTANCE /*prev*/, LPSTR /*args*/,
   BOOL ok;
   while ((ok = GetMessage(&msg, nullptr, 0, 0)) != 0) {
     if (ok) {
+      mod.handle_keypress(msg);
       TranslateMessage(&msg);
       DispatchMessage(&msg);
-
     } else {
       OutputDebugStringA("GetMessage failed.");
     }

@@ -33,6 +33,11 @@ void init(HINSTANCE instance, State& init_state);
 
 LRESULT handle_message(HWND, UINT msg, WPARAM, LPARAM);
 
+void handle_keypress(const MSG& msg);
+
 void destroy();
 
 State& get_state();
+
+// TODO: Probably belongs somewhere else...
+void get_screen_resolution(LONG* out_width, LONG* out_height);

@@ -12,11 +12,13 @@ set(DLL_HEADER_FILES
     src/bar.h
     src/config.h
     src/handler.h
+    src/movement.h
 )
 set(DLL_SOURCE_FILES
     src/bar.cpp
     src/config.cpp
     src/handler.cpp
+    src/movement.cpp
 )
 set(EXE_SOURCE_FILES
     src/main.cpp
