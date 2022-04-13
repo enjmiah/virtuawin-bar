@@ -133,8 +133,9 @@ void init_bar(State& state, const HINSTANCE instance, const HWND parent) {
   state.bar_hwnd = hwnd;
   SetWindowLong(hwnd, GWL_STYLE, 0); // Remove title bar and border.
   resize_client(state);
-  SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-               SWP_NOMOVE | SWP_NOSIZE); // Always on top.
+  if (state.bar_topmost) {
+    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+  }
 
   ShowWindow(hwnd, SW_SHOWNA);
 }

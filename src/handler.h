@@ -20,6 +20,8 @@ struct State {
   HWND messaging_hwnd = nullptr;
   // Handle to the bar window (null if non-existent).
   HWND bar_hwnd = nullptr;
+  // Whether the bar should be kept on top always.
+  bool bar_topmost = true;
 
   // Desktop i has at least one window if and only if desktops & (1 << i) != 0.
   uint32_t desktops = 0;

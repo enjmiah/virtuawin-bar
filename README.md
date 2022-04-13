@@ -72,3 +72,9 @@ resources, it does *not* poll for changes.  VirtuaWin (currently) does not
 support setting a handler in response to when you move a window to an empty
 desktop, thus when doing so, the bar display will be out of date until the next
 desktop switch.
+
+
+Miscellaneous
+-------------
+
+The always-on-top behaviour can be toggled by right-clicking anywhere on the bar.

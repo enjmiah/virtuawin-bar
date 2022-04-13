@@ -166,6 +166,7 @@ void init(const HINSTANCE instance, State& init_state) {
   }
 }
 
+// TODO: Function name is misleading here since we also handle mouse clicks here...
 void handle_keypress(const MSG& msg) {
   if (msg.message == WM_HOTKEY) {
     switch (msg.wParam) {
@@ -178,6 +179,16 @@ void handle_keypress(const MSG& msg) {
 
       default:
         OutputDebugStringA("Unrecognized key command.\n");
+    }
+  } else if (msg.message == WM_RBUTTONDOWN) {
+    if (state->bar_hwnd) {
+      // Toggle topmost.
+      state->bar_topmost = !state->bar_topmost;
+      if (state->bar_topmost) {
+        SetWindowPos(state->bar_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+      } else {
+        SetWindowPos(state->bar_hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+      }
     }
   }
 }
