@@ -5,6 +5,11 @@ which lists all of the non-empty virtual desktops, and highlights the currently
 active one.  It is aesthetically similar to status bars designed to work with
 tiling window managers, like i3bar and Polybar.
 
+For convenience, *virtuawin-bar* also optionally provides keybindings for
+switching focus to a window in a specified cardinal direction, similar to
+functionality found in tiling window managers.  This feature is disabled by
+default in order to be non-intrusive.
+
 *virtuawin-bar* is light on system resources, and uses less than 1 MB of memory
 and negligible CPU time when idle.
 
