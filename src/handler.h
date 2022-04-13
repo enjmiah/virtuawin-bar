@@ -8,16 +8,6 @@
 
 #include <cstdint>
 
-#ifdef VWBAR_HOT_RELOAD
-  #ifdef VWBAR_EXPORTS
-    #define VWBAR_API extern "C" __declspec(dllexport)
-  #else
-    #define VWBAR_API extern "C" __declspec(dllimport)
-  #endif
-#else
-  #define VWBAR_API
-#endif
-
 struct State {
   Config config;
   // Flags.
@@ -39,10 +29,10 @@ struct State {
   uint8_t active_desktop = 0;
 };
 
-VWBAR_API void init(HINSTANCE instance, State& init_state);
+void init(HINSTANCE instance, State& init_state);
 
-VWBAR_API LRESULT handle_message(HWND, UINT msg, WPARAM, LPARAM);
+LRESULT handle_message(HWND, UINT msg, WPARAM, LPARAM);
 
-VWBAR_API void destroy();
+void destroy();
 
 State& get_state();
