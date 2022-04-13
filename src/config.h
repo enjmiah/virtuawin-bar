@@ -2,8 +2,6 @@
 
 #include <stdint.h>
 
-namespace vwbar {
-
 struct RGBColor {
   float r;
   float g;
@@ -53,5 +51,3 @@ struct Config {
 
 int config_entry_handler(void* config, const char* section, const char* name,
                          const char* value);
-
-} // namespace vwbar

@@ -10,10 +10,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-namespace {
-
-/// Return the number of bits set in v.
-int popcount(uint32_t v) {
+/** Return the number of bits set in v. */
+static int popcount(uint32_t v) {
   int c = 0; // c accumulates the total bits set in v.
   for (; v; c++) {
     v &= v - 1; // Clear the least significant bit set.
@@ -21,10 +19,10 @@ int popcount(uint32_t v) {
   return c;
 }
 
-void draw_bar(cairo_t* const cr) {
+static void draw_bar(cairo_t* const cr) {
   constexpr auto pi = 3.14159265359;
   constexpr auto degrees = pi / 180.0;
-  const auto& state = ::vwbar::get_state();
+  const auto& state = get_state();
   const auto& config = state.config;
   const auto radius = config.corner_radius;
   const auto n_desktops = popcount(state.desktops);
@@ -82,8 +80,8 @@ void draw_bar(cairo_t* const cr) {
   }
 }
 
-/// Handle WM_PAINT.
-void paint(const HWND hwnd) {
+/** Handle WM_PAINT. */
+static void paint(const HWND hwnd) {
   PAINTSTRUCT ps;
   auto* const hdc = BeginPaint(hwnd, &ps);
 
@@ -101,9 +99,9 @@ void paint(const HWND hwnd) {
   EndPaint(hwnd, &ps);
 }
 
-/// Handle window messages to the bar.
-LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
-                 const LPARAM lParam) {
+/** Handle window messages to the bar. */
+static LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
+                        const LPARAM lParam) {
   switch (msg) {
     case WM_PAINT:
       paint(hwnd);
@@ -118,7 +116,7 @@ LRESULT wnd_proc(const HWND hwnd, const UINT msg, const WPARAM wParam,
   return 0;
 }
 
-void get_screen_resolution(LONG* out_width, LONG* out_height) {
+static void get_screen_resolution(LONG* out_width, LONG* out_height) {
   auto* const desktop = GetDesktopWindow();
   RECT rect;
   GetWindowRect(desktop, &rect);
@@ -127,10 +125,6 @@ void get_screen_resolution(LONG* out_width, LONG* out_height) {
   if (out_height)
     *out_height = rect.bottom;
 }
-
-} // namespace
-
-namespace vwbar {
 
 void init_bar(State& state, const HINSTANCE instance, const HWND parent) {
   constexpr auto module_name = TEXT("vwbar");
@@ -191,5 +185,3 @@ void resize_client(const State& state) {
     }
   }
 }
-
-} // namespace vwbar

@@ -10,18 +10,12 @@
 
 #include <cstdio>
 
-namespace {
+static State* state = nullptr;
 
-::vwbar::State* state = nullptr;
-
-void unset_handler() {
+static void unset_handler() {
   // wParam == 2: Remove self as desktop change handler.
   SendMessage(state->vw_handle, VW_ICHANGEDESK, 2, 0);
 }
-
-} // namespace
-
-namespace vwbar {
 
 __inline BOOL CALLBACK enum_windows_proc(const HWND hwnd, const LPARAM desk_count) {
   if (state->vw_handle) {
@@ -162,5 +156,3 @@ void destroy() {
 }
 
 State& get_state() { return *state; }
-
-} // namespace vwbar

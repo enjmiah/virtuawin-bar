@@ -3,20 +3,18 @@
 #include <ctime>
 #include <sstream>
 
-namespace vb = ::vwbar;
-
 constexpr auto module_name = TEXT("virtuawin-bar");
 constexpr auto module_name_exe = TEXT("virtuawin-bar.exe");
 
 struct Module {
-  vb::State state;
+  State state;
 #ifdef VWBAR_HOT_RELOAD
   HMODULE dll = nullptr;
   FILETIME load_time;
 #endif
-  decltype(&vb::init) init;
-  decltype(&vb::destroy) destroy;
-  decltype(&vb::handle_message) handle_message;
+  decltype(&init) init;
+  decltype(&destroy) destroy;
+  decltype(&handle_message) handle_message;
 } mod;
 
 bool dynamic_load_module(Module& mod, const HINSTANCE instance,
@@ -48,9 +46,9 @@ bool dynamic_load_module(Module& mod, const HINSTANCE instance,
     return false;
   }
 #else
-  mod.init = vb::init;
-  mod.destroy = vb::destroy;
-  mod.handle_message = vb::handle_message;
+  mod.init = init;
+  mod.destroy = destroy;
+  mod.handle_message = handle_message;
 #endif
 
   mod.init(instance, mod.state);
@@ -104,7 +102,7 @@ int WINAPI WinMain(const HINSTANCE instance, HINSTANCE /*prev*/, LPSTR /*args*/,
 #ifdef VWBAR_HOT_RELOAD
   wc.lpfnWndProc = delegate_message;
 #else
-  wc.lpfnWndProc = vb::handle_message;
+  wc.lpfnWndProc = handle_message;
 #endif
   wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
   RegisterClass(&wc);

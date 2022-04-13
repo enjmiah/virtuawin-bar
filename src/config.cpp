@@ -2,8 +2,6 @@
 
 #include <dwmapi.h>
 
-namespace vwbar {
-
 static bool get_accent_color(RGBColor* color) {
   DWORD active_caption; // AARRGGBB
   BOOL opaque_blend;
@@ -88,5 +86,3 @@ int config_entry_handler(void* user, const char* section, const char* name,
   }
   return 1;
 }
-
-} // namespace vwbar

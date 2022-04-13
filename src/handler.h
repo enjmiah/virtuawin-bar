@@ -18,8 +18,6 @@
   #define VWBAR_API
 #endif
 
-namespace vwbar {
-
 struct State {
   Config config;
   // Flags.
@@ -48,5 +46,3 @@ VWBAR_API LRESULT handle_message(HWND, UINT msg, WPARAM, LPARAM);
 VWBAR_API void destroy();
 
 State& get_state();
-
-} // namespace vwbar
