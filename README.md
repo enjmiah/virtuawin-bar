@@ -25,12 +25,12 @@ Installing
 
 ### Binary releases
 
-TODO: Will be available from the [Releases
-page](https://github.com/enjmiah/virtuawin-bar/releases).
+A pre-compiled binary can be downloaded from the
+[Releases page](https://github.com/enjmiah/virtuawin-bar/releases).
 
-Simply drop `virtuawin-bar.exe` into the `modules` directory of your VirtuaWin
-installation to install it.  See the [official documentation on
-modules][vwmodules] for details.
+Download `virtuawin-bar.exe` and drop it into the `modules` directory of your
+VirtuaWin installation to install it.
+See the [official documentation on modules][vwmodules] for details.
 
 
 ### Building from source
