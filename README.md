@@ -1,5 +1,7 @@
 <h1 align="center">virtuawin-bar</h1>
 
+<img src="docs/screenshot.jpg" alt="screenshot" align="right">
+
 _**virtuawin-bar**_ is a [VirtuaWin](https://virtuawin.sourceforge.io/) module
 which lists all of the non-empty virtual desktops, and highlights the currently
 active one.  It is aesthetically similar to status bars designed to work with
