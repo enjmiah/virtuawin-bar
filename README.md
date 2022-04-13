@@ -55,8 +55,8 @@ Configuration
 -------------
 
 *virtuawin-bar* can be configured using a configuration file located at
-`%APPDATA%/vwbar.ini`.  See [`docs/vwbar.ini`](docs/vwbar.ini) for documentation
-and an example configuration file.
+`%APPDATA%/vwbar.ini`.  See [`vwbar.ini`](vwbar.ini) for documentation and an
+example configuration file.
 
 
 Limitations
